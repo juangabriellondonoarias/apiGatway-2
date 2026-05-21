@@ -1,6 +1,9 @@
 server:
   port: 8080
 
+jwt:
+  secret: ${JWT_SECRET:TuClaveSecretaSuperSeguraParaElSena2026}
+
 spring:
   application:
     name: api-gateway
@@ -9,16 +12,164 @@ spring:
       host: localhost
       port: 8500
       discovery:
-        # Esto permite que el Gateway use nombres en lugar de IPs
+        prefer-ip-address: true
         instance-id: ${spring.application.name}:${random.value}
         health-check-path: /actuator/health
         health-check-interval: 10s
     gateway:
       discovery:
         locator:
-          enabled: true # Esto auto-detecta servicios en Consul
+          enabled: true # Esto auto-detecta servicios en Consul como respaldo
       routes:
-        - id: servicio-cocina
-          uri: lb://servicio-cocina # "lb" activa el balanceo de carga
+        # ==========================================
+        # 1. GESTIÓN DE USUARIOS / AUTENTICACIÓN
+        # ==========================================
+        - id: usuarios-public
+          uri: lb://servicio-usuarios
           predicates:
-            - Path=/cocina/** # Todo lo que vaya a /cocina lo manda al microservicio
+            - Path=/api/usuarios/public/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        - id: usuarios-private
+          uri: lb://servicio-usuarios
+          predicates:
+            - Path=/api/usuarios/**
+          filters:
+            - JwtAuthenticationFilter
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        # ==========================================
+        # 2. COCINA
+        # ==========================================
+        - id: cocina-public
+          uri: lb://gs-ms-cocina
+          predicates:
+            - Path=/api/cocina/public/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        - id: cocina-private
+          uri: lb://gs-ms-cocina
+          predicates:
+            - Path=/api/cocina/**
+          filters:
+            - JwtAuthenticationFilter
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        # ==========================================
+        # 3. INVENTARIO
+        # ==========================================
+        - id: inventario-public
+          uri: lb://servicio-inventario
+          predicates:
+            - Path=/api/inventario/public/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        - id: inventario-private
+          uri: lb://servicio-inventario
+          predicates:
+            - Path=/api/inventario/**
+          filters:
+            - JwtAuthenticationFilter
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        # ==========================================
+        # 4. BAR Y BARISMO
+        # ==========================================
+        - id: bar-public
+          uri: lb://servicio-bar
+          predicates:
+            - Path=/api/bar/public/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        - id: bar-private
+          uri: lb://servicio-bar
+          predicates:
+            - Path=/api/bar/**
+          filters:
+            - JwtAuthenticationFilter
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        # ==========================================
+        # 5. INICIO GENERAL
+        # ==========================================
+        - id: inicio-public
+          uri: lb://servicio-inicio-general
+          predicates:
+            - Path=/api/inicio/public/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        - id: inicio-private
+          uri: lb://servicio-inicio-general
+          predicates:
+            - Path=/api/inicio/**
+          filters:
+            - JwtAuthenticationFilter
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        # ==========================================
+        # 6. REPORTES
+        # ==========================================
+        - id: reportes-public
+          uri: lb://servicio-reportes
+          predicates:
+            - Path=/api/reportes/public/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        - id: reportes-private
+          uri: lb://servicio-reportes
+          predicates:
+            - Path=/api/reportes/**
+          filters:
+            - JwtAuthenticationFilter
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        # ==========================================
+        # 7. RESTAURANTE
+        # ==========================================
+        - id: restaurante-public
+          uri: lb://servicio-restaurante
+          predicates:
+            - Path=/api/restaurante/public/**
+          filters:
+            - StripPrefix=2
+            - PrefixPath=/api
+
+        - id: restaurante-private
+          uri: lb://servicio-restaurante
+          predicates:
+            - Path=/api/restaurante/**
+          filters:
+            - JwtAuthenticationFilter
+            - StripPrefix=2
+            - PrefixPath=/api
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200" # URL de Angular
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
