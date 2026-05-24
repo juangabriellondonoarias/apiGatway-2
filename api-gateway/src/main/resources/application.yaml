@@ -4,6 +4,26 @@ server:
 jwt:
   secret: ${JWT_SECRET:TuClaveSecretaSuperSeguraParaElSena2026}
 
+# Configuración del agregador de OpenAPI 3.0 (Swagger UI unificado)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: 1. Gestión de Usuarios (servicio-usuarios)
+        url: /api/usuarios/v3/api-docs
+      - name: 2. Cocina (gs-ms-cocina)
+        url: /api/cocina/v3/api-docs
+      - name: 3. Inventario (servicio-inventario)
+        url: /api/inventario/v3/api-docs
+      - name: 4. Bar y Barismo (servicio-bar)
+        url: /api/bar/v3/api-docs
+      - name: 5. Inicio General (servicio-inicio-general)
+        url: /api/inicio/v3/api-docs
+      - name: 6. Reportes (servicio-reportes)
+        url: /api/reportes/v3/api-docs
+      - name: 7. Restaurante (servicio-restaurante)
+        url: /api/restaurante/v3/api-docs
+
 spring:
   application:
     name: api-gateway
@@ -24,6 +44,13 @@ spring:
         # ==========================================
         # 1. GESTIÓN DE USUARIOS / AUTENTICACIÓN
         # ==========================================
+        - id: usuarios-swagger
+          uri: lb://servicio-usuarios
+          predicates:
+            - Path=/api/usuarios/v3/api-docs
+          filters:
+            - StripPrefix=2
+
         - id: usuarios-public
           uri: lb://servicio-usuarios
           predicates:
@@ -38,12 +65,27 @@ spring:
             - Path=/api/usuarios/**
           filters:
             - JwtAuthenticationFilter
+            - name: RateLimiterFilter
+              args:
+                capacity: 10
+                refillRate: 2
+            - name: CircuitBreaker
+              args:
+                name: usuariosCircuitBreaker
+                fallbackUri: forward:/fallback/usuarios
             - StripPrefix=2
             - PrefixPath=/api
 
         # ==========================================
         # 2. COCINA
         # ==========================================
+        - id: cocina-swagger
+          uri: lb://gs-ms-cocina
+          predicates:
+            - Path=/api/cocina/v3/api-docs
+          filters:
+            - StripPrefix=2
+
         - id: cocina-public
           uri: lb://gs-ms-cocina
           predicates:
@@ -58,12 +100,27 @@ spring:
             - Path=/api/cocina/**
           filters:
             - JwtAuthenticationFilter
+            - name: RateLimiterFilter
+              args:
+                capacity: 10
+                refillRate: 2
+            - name: CircuitBreaker
+              args:
+                name: cocinaCircuitBreaker
+                fallbackUri: forward:/fallback/cocina
             - StripPrefix=2
             - PrefixPath=/api
 
         # ==========================================
         # 3. INVENTARIO
         # ==========================================
+        - id: inventario-swagger
+          uri: lb://servicio-inventario
+          predicates:
+            - Path=/api/inventario/v3/api-docs
+          filters:
+            - StripPrefix=2
+
         - id: inventario-public
           uri: lb://servicio-inventario
           predicates:
@@ -78,12 +135,27 @@ spring:
             - Path=/api/inventario/**
           filters:
             - JwtAuthenticationFilter
+            - name: RateLimiterFilter
+              args:
+                capacity: 10
+                refillRate: 2
+            - name: CircuitBreaker
+              args:
+                name: inventarioCircuitBreaker
+                fallbackUri: forward:/fallback/inventario
             - StripPrefix=2
             - PrefixPath=/api
 
         # ==========================================
         # 4. BAR Y BARISMO
         # ==========================================
+        - id: bar-swagger
+          uri: lb://servicio-bar
+          predicates:
+            - Path=/api/bar/v3/api-docs
+          filters:
+            - StripPrefix=2
+
         - id: bar-public
           uri: lb://servicio-bar
           predicates:
@@ -98,12 +170,27 @@ spring:
             - Path=/api/bar/**
           filters:
             - JwtAuthenticationFilter
+            - name: RateLimiterFilter
+              args:
+                capacity: 10
+                refillRate: 2
+            - name: CircuitBreaker
+              args:
+                name: barCircuitBreaker
+                fallbackUri: forward:/fallback/general
             - StripPrefix=2
             - PrefixPath=/api
 
         # ==========================================
         # 5. INICIO GENERAL
         # ==========================================
+        - id: inicio-swagger
+          uri: lb://servicio-inicio-general
+          predicates:
+            - Path=/api/inicio/v3/api-docs
+          filters:
+            - StripPrefix=2
+
         - id: inicio-public
           uri: lb://servicio-inicio-general
           predicates:
@@ -118,12 +205,27 @@ spring:
             - Path=/api/inicio/**
           filters:
             - JwtAuthenticationFilter
+            - name: RateLimiterFilter
+              args:
+                capacity: 10
+                refillRate: 2
+            - name: CircuitBreaker
+              args:
+                name: inicioCircuitBreaker
+                fallbackUri: forward:/fallback/general
             - StripPrefix=2
             - PrefixPath=/api
 
         # ==========================================
         # 6. REPORTES
         # ==========================================
+        - id: reportes-swagger
+          uri: lb://servicio-reportes
+          predicates:
+            - Path=/api/reportes/v3/api-docs
+          filters:
+            - StripPrefix=2
+
         - id: reportes-public
           uri: lb://servicio-reportes
           predicates:
@@ -138,12 +240,27 @@ spring:
             - Path=/api/reportes/**
           filters:
             - JwtAuthenticationFilter
+            - name: RateLimiterFilter
+              args:
+                capacity: 10
+                refillRate: 2
+            - name: CircuitBreaker
+              args:
+                name: reportesCircuitBreaker
+                fallbackUri: forward:/fallback/general
             - StripPrefix=2
             - PrefixPath=/api
 
         # ==========================================
         # 7. RESTAURANTE
         # ==========================================
+        - id: restaurante-swagger
+          uri: lb://servicio-restaurante
+          predicates:
+            - Path=/api/restaurante/v3/api-docs
+          filters:
+            - StripPrefix=2
+
         - id: restaurante-public
           uri: lb://servicio-restaurante
           predicates:
@@ -158,6 +275,14 @@ spring:
             - Path=/api/restaurante/**
           filters:
             - JwtAuthenticationFilter
+            - name: RateLimiterFilter
+              args:
+                capacity: 10
+                refillRate: 2
+            - name: CircuitBreaker
+              args:
+                name: restauranteCircuitBreaker
+                fallbackUri: forward:/fallback/general
             - StripPrefix=2
             - PrefixPath=/api
 
