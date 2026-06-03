@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8085
 
 jwt:
   secret: ${JWT_SECRET:TuClaveSecretaSuperSeguraParaElSena2026}
@@ -29,7 +29,7 @@ spring:
     name: api-gateway
   cloud:
     consul:
-      host: localhost
+      host: ${SPRING_CONSUL_HOST:localhost}
       port: 8500
       discovery:
         prefer-ip-address: true
@@ -55,8 +55,9 @@ spring:
           uri: lb://servicio-usuarios
           predicates:
             - Path=/api/usuarios/public/**
+            - Method=GET
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
             - PrefixPath=/api
 
         - id: usuarios-private
@@ -90,8 +91,9 @@ spring:
           uri: lb://gs-ms-cocina
           predicates:
             - Path=/api/cocina/public/**
+            - Method=GET
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
             - PrefixPath=/api
 
         - id: cocina-private
@@ -125,8 +127,9 @@ spring:
           uri: lb://servicio-inventario
           predicates:
             - Path=/api/inventario/public/**
+            - Method=GET
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
             - PrefixPath=/api
 
         - id: inventario-private
@@ -160,8 +163,9 @@ spring:
           uri: lb://servicio-bar
           predicates:
             - Path=/api/bar/public/**
+            - Method=GET
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
             - PrefixPath=/api
 
         - id: bar-private
@@ -195,8 +199,9 @@ spring:
           uri: lb://servicio-inicio-general
           predicates:
             - Path=/api/inicio/public/**
+            - Method=GET
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
             - PrefixPath=/api
 
         - id: inicio-private
@@ -230,8 +235,9 @@ spring:
           uri: lb://servicio-reportes
           predicates:
             - Path=/api/reportes/public/**
+            - Method=GET
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
             - PrefixPath=/api
 
         - id: reportes-private
@@ -265,8 +271,9 @@ spring:
           uri: lb://servicio-restaurante
           predicates:
             - Path=/api/restaurante/public/**
+            - Method=GET
           filters:
-            - StripPrefix=2
+            - StripPrefix=3
             - PrefixPath=/api
 
         - id: restaurante-private

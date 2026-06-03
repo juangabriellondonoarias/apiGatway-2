@@ -8,5 +8,27 @@ services:
       - "8500:8500" # Interfaz web para ver servicios activos
       - "8600:8600/udp"
     command: "agent -server -bootstrap-expect=1 -ui -bind=0.0.0.0 -client=0.0.0.0"
+    networks:
+      - red-gateway
 
-  # Aquí podrías agregar más adelante tu API Gateway y Microservicios
+  # API Gateway Standalone
+  api-gateway:
+    image: ga-api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    depends_on:
+      - consul-server
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_CONSUL_HOST=consul-server # Conecta con el Consul de la misma red
+      - JWT_SECRET=TuClaveSecretaSuperSeguraParaElSena2026
+    restart: unless-stopped
+    networks:
+      - red-gateway
+
+networks:
+  red-gateway:
+    driver: bridge
